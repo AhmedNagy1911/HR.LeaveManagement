@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/scr/" />
+  <Folder Name="/scr/Api/" />
+  <Folder Name="/scr/Core/" />
+  <Folder Name="/scr/Infrastructure/" />
+  <Folder Name="/test/" />
+</Solution>
