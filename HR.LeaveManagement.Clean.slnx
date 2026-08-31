@@ -1,7 +1,4 @@
 <Solution>
-  <Folder Name="/scr/" />
-  <Folder Name="/scr/Api/" />
-  <Folder Name="/scr/Core/" />
-  <Folder Name="/scr/Infrastructure/" />
-  <Folder Name="/test/" />
+  <Project Path="HR.LeaveManagement.Application/HR.LeaveManagement.Application.csproj" Id="26acebd1-71af-4e4e-b0c3-644868311475" />
+  <Project Path="HR.LeaveManagement.Domain/HR.LeaveManagement.Domain.csproj" />
 </Solution>
