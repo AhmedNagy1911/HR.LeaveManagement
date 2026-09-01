@@ -24,12 +24,13 @@ public class GenericRepository<T>(HrDatabaseContext context)
 
     public async Task<IReadOnlyList<T>> GetAsync()
     {
-        return await _context.Set<T>().ToListAsync();
+        return await _context.Set<T>().AsNoTracking().ToListAsync();
     }
 
     public async Task<T> GetByIdAsync(int id)
     {
         return await _context.Set<T>()
+            .AsNoTracking()
             .FirstOrDefaultAsync(q => q.Id == id);
     }
 
