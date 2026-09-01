@@ -12,6 +12,9 @@ public class CreateLeaveTypeCommandHandler(ILeaveTypeRepository leaveTypeReposit
 
     public async Task<int> Handle(CreateLeaveTypeCommand request, CancellationToken cancellationToken)
     {
+        // Validate incoming data
+
+
 
         // convert to domain entity object
         var leaveTypeToCreate = _mapper.Map<Domain.LeaveType>(request);
