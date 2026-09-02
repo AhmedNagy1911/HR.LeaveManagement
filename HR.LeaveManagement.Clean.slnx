@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="HR.LeaveManagement.Api/HR.LeaveManagement.Api.csproj" Id="f0dedb42-f9e6-414f-8b01-f1a182201f46" />
   <Project Path="HR.LeaveManagement.Application/HR.LeaveManagement.Application.csproj" Id="26acebd1-71af-4e4e-b0c3-644868311475" />
   <Project Path="HR.LeaveManagement.Domain/HR.LeaveManagement.Domain.csproj" />
   <Project Path="HR.LeaveManagement.Infrastructure/HR.LeaveManagement.Infrastructure.csproj" Id="088ab4a6-0566-4d38-bf46-c3042e475b5e" />
