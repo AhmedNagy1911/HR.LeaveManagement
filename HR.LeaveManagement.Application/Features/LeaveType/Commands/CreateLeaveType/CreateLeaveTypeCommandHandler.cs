@@ -13,16 +13,13 @@ public class CreateLeaveTypeCommandHandler(ILeaveTypeRepository leaveTypeReposit
 
     public async Task<int> Handle(CreateLeaveTypeCommand request, CancellationToken cancellationToken)
     {
-        // Validate incoming data
-        // Validate incoming data
+
         var validator = new CreateLeaveTypeCommandValidator(_leavetyperepository);
         var validationResult = await validator.ValidateAsync(request);
 
         if (validationResult.Errors.Any())
             throw new BadRequestException("Invalid Leave type", validationResult);
 
-
-        // convert to domain entity object
         var leaveTypeToCreate = _mapper.Map<Domain.LeaveType>(request);
 
         // add to database

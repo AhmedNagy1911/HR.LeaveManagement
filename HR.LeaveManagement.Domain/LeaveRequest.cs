@@ -2,6 +2,11 @@
 
 namespace HR.LeaveManagement.Domain;
 
+/// <summary>
+/// Represents a leave request submitted by an employee,
+/// including the requested dates, leave type, approval status,
+/// and any additional comments.
+/// </summary>
 public class LeaveRequest : BaseEntity
 {
     public DateTime StartDate { get; set; }
