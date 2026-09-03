@@ -1,13 +1,7 @@
 ﻿using FluentValidation;
 using HR.LeaveManagement.Application.Contracts.Persistence;
-using HR.LeaveManagement.Application.Features.LeaveAllocations.Requests.Commands;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace HR.LeaveManagement.Application.DTOs.LeaveAllocation.Validators
+namespace HR.LeaveManagement.Application.Features.LeaveAllocation.Commands.UpdateLeaveAllocation
 {
     public class UpdateLeaveAllocationCommandValidator : AbstractValidator<UpdateLeaveAllocationCommand>
     {
