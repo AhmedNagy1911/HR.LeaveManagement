@@ -32,7 +32,6 @@
 
   <ItemGroup>
     <Folder Include="Features\LeaveTypes\" />
-    <Folder Include="Mocks\" />
   </ItemGroup>
 
 </Project>
