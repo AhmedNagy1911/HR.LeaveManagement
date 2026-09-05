@@ -4,5 +4,6 @@
   <Project Path="HR.LeaveManagement.Application/HR.LeaveManagement.Application.csproj" Id="26acebd1-71af-4e4e-b0c3-644868311475" />
   <Project Path="HR.LeaveManagement.Domain/HR.LeaveManagement.Domain.csproj" />
   <Project Path="HR.LeaveManagement.Infrastructure/HR.LeaveManagement.Infrastructure.csproj" Id="088ab4a6-0566-4d38-bf46-c3042e475b5e" />
+  <Project Path="HR.LeaveManagement.Persistence.IntegrationTests/HR.LeaveManagement.Persistence.IntegrationTests.csproj" Id="13eb7994-59e6-4854-83be-b5f3516599cb" />
   <Project Path="HR.LeaveManagement.Persistence/HR.LeaveManagement.Persistence.csproj" Id="e018bb56-622a-4f6c-9595-dd48ae333582" />
 </Solution>
