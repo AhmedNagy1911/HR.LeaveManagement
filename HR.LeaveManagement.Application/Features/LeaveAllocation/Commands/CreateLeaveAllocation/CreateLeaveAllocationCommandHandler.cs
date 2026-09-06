@@ -1,33 +1,57 @@
 ﻿using AutoMapper;
+using HR.LeaveManagement.Application.Contracts.Identity;
 using HR.LeaveManagement.Application.Contracts.Persistence;
 using HR.LeaveManagement.Application.Exceptions;
+using HR.LeaveManagement.Application.Features.LeaveAllocation.Commands.CreateLeaveAllocation;
+using HR.LeaveManagement.Domain;
 using MediatR;
 
-namespace HR.LeaveManagement.Application.Features.LeaveAllocation.Commands.CreateLeaveAllocation
+public class CreateLeaveAllocationCommandHandler(
+    ILeaveAllocationRepository leaveAllocationRepository, ILeaveTypeRepository leaveTypeRepository,
+    IUserService userService) : IRequestHandler<CreateLeaveAllocationCommand, Unit>
 {
-    public class CreateLeaveAllocationCommandHandler(IMapper mapper
-        ,ILeaveAllocationRepository leaveAllocationRepository
-        , ILeaveTypeRepository leaveTypeRepository)
-        : IRequestHandler<CreateLeaveAllocationCommand, Unit>
+    private readonly ILeaveAllocationRepository _leaveAllocationRepository = leaveAllocationRepository;
+    private readonly ILeaveTypeRepository _leaveTypeRepository = leaveTypeRepository;
+    private readonly IUserService _userService = userService;
+
+    public async Task<Unit> Handle(CreateLeaveAllocationCommand request, CancellationToken cancellationToken)
     {
-        private readonly IMapper _mapper = mapper;
-        private readonly ILeaveAllocationRepository _leaveAllocationRepository = leaveAllocationRepository;
-        private readonly ILeaveTypeRepository _leaveTypeRepository = leaveTypeRepository;
+        var validator = new CreateLeaveAllocationCommandValidator(_leaveTypeRepository);
+        var validationResult = await validator.ValidateAsync(request);
 
-        public async Task<Unit> Handle(CreateLeaveAllocationCommand request, CancellationToken cancellationToken)
+        if (validationResult.Errors.Any())
+            throw new BadRequestException("Invalid Leave Allocation Request", validationResult);
+
+        // Get Leave type for allocations
+        var leaveType = await _leaveTypeRepository.GetByIdAsync(request.LeaveTypeId);
+
+        // Get Employees
+        var employees = await _userService.GetEmployees();
+
+        //Get Period
+        var period = DateTime.Now.Year;
+
+        //Assign Allocations IF an allocation doesn't already exist for period and leave type
+        var allocations = new List<LeaveAllocation>();
+        foreach (var emp in employees)
         {
-            var validator = new CreateLeaveAllocationCommandValidator(_leaveTypeRepository);
-            var validationResult = await validator.ValidateAsync(request);
+            var allocationExists = await _leaveAllocationRepository.AllocationExists(emp.Id, request.LeaveTypeId, period);
 
-            if (validationResult.Errors.Any())
-                throw new BadRequestException("Invalid Leave Allocation Request", validationResult);
-
-            // Get Leave type for allocations
-            var leaveType = await _leaveTypeRepository.GetByIdAsync(request.LeaveTypeId);
-            var leaveAllocation = _mapper.Map<Domain.LeaveAllocation>(request);
-            await _leaveAllocationRepository.CreateAsync(leaveAllocation);
-
-            return Unit.Value;
+            if (allocationExists == false)
+            {
+                allocations.Add(new LeaveAllocation
+                {
+                    EmployeeId = emp.Id,
+                    LeaveTypeId = leaveType.Id,
+                    NumberOfDays = leaveType.DefaultDays,
+                    Period = period,
+                });
+            }
         }
+
+        if (allocations.Any())
+            await _leaveAllocationRepository.AddAllocations(allocations);
+
+        return Unit.Value;
     }
 }
