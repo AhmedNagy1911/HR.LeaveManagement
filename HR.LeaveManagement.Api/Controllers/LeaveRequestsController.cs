@@ -14,14 +14,9 @@ namespace HR.LeaveManagement.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-public class LeaveRequestsController : ControllerBase
+public class LeaveRequestsController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public LeaveRequestsController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     // GET: api/<LeaveRequestsController>
     [HttpGet]
