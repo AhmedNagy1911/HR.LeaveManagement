@@ -1,8 +1,8 @@
 ﻿using HR.LeaveManagement.Application.Contracts.Email;
 using HR.LeaveManagement.Application.Models.Email;
 using Microsoft.Extensions.Options;
-using SendGrid;
-using SendGrid.Helpers.Mail;
+using System.Net;
+using System.Net.Mail;
 
 namespace HR.LeaveManagement.Infrastructure.EmailService;
 
@@ -15,18 +15,23 @@ public class EmailSender : IEmailSender
     }
     public async Task<bool> SendEmail(EmailMessage email)
     {
-        var client = new SendGridClient(_emailSettings.ApiKey);
-        var to = new EmailAddress(email.To);
-        var from = new EmailAddress
+        var message = new MailMessage
         {
-            Email = _emailSettings.FromAddress,
-            Name = _emailSettings.FromName
+            From = new MailAddress(_emailSettings.FromEmail, _emailSettings.FromName),
+            Subject = email.Subject,
+            Body = email.Body,
+            IsBodyHtml = true
+        };
+        message.To.Add(email.To);
+
+        using var client = new SmtpClient(_emailSettings.Host, _emailSettings.Port)
+        {
+            Credentials = new NetworkCredential(_emailSettings.UserName, _emailSettings.Password),
+            EnableSsl = _emailSettings.EnableSsl
         };
 
-        var message = MailHelper.CreateSingleEmail(from, to, email.Subject, email.Body, email.Body);
-        var response = await client.SendEmailAsync(message);
-
-        return response.IsSuccessStatusCode;
+        await client.SendMailAsync(message);
+        return true;
     }
 }
 

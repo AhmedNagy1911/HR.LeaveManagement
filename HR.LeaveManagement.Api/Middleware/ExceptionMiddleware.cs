@@ -1,6 +1,5 @@
 ﻿using HR.LeaveManagement.Api.Models;
 using HR.LeaveManagement.Application.Exceptions;
-using Newtonsoft.Json;
 using System.Net;
 namespace HR.LeaveManagement.Api.Middleware;
 
@@ -67,7 +66,7 @@ public class ExceptionMiddleware
         }
 
         httpContext.Response.StatusCode = (int)statusCode;
-        var logMessage = JsonConvert.SerializeObject(problem);
+        var logMessage = System.Text.Json.JsonSerializer.Serialize(problem);
         _logger.LogError(logMessage);
         await httpContext.Response.WriteAsJsonAsync(problem);
 
