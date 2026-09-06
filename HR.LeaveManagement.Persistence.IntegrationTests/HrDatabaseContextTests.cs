@@ -1,20 +1,26 @@
-﻿using HR.LeaveManagement.Domain;
+﻿using HR.LeaveManagement.Application.Contracts.Identity;
+using HR.LeaveManagement.Domain;
 using HR.LeaveManagement.Persistence.DatabaseContext;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
+using Moq;
 
 namespace HR.LeaveManagement.Persistence.IntegrationTests;
 
 public class HrDatabaseContextTests
 {
     private HrDatabaseContext _hrDatabaseContext;
-
+    private readonly string _userId;
+    private readonly Mock<IUserService> _userServiceMock;
     public HrDatabaseContextTests()
     {
         var dbOptions = new DbContextOptionsBuilder<HrDatabaseContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        _userId = "00000000-0000-0000-0000-000000000000";
+        _userServiceMock = new Mock<IUserService>();
+        _userServiceMock.Setup(m => m.UserId).Returns(_userId);
 
-        _hrDatabaseContext = new HrDatabaseContext(dbOptions);
+        _hrDatabaseContext = new HrDatabaseContext(dbOptions, _userServiceMock.Object);
     }
 
     [Fact]
@@ -29,8 +35,8 @@ public class HrDatabaseContextTests
         };
 
         // Act
-        await _hrDatabaseContext.LeaveTypes.AddAsync(leaveType, TestContext.Current.CancellationToken);
-        await _hrDatabaseContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await _hrDatabaseContext.LeaveTypes.AddAsync(leaveType);
+        await _hrDatabaseContext.SaveChangesAsync();
 
         // Assert
         leaveType.DateCreated.ShouldNotBeNull();
@@ -48,8 +54,8 @@ public class HrDatabaseContextTests
         };
 
         // Act
-        await _hrDatabaseContext.LeaveTypes.AddAsync(leaveType, TestContext.Current.CancellationToken);
-        await _hrDatabaseContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await _hrDatabaseContext.LeaveTypes.AddAsync(leaveType);
+        await _hrDatabaseContext.SaveChangesAsync();
 
         // Assert
         leaveType.DateModified.ShouldNotBeNull();
