@@ -4,12 +4,14 @@ using HR.LeaveManagement.Application.Features.LeaveAllocation.Commands.UpdateLea
 using HR.LeaveManagement.Application.Features.LeaveAllocation.Queries.GetLeaveAllocationDetails;
 using HR.LeaveManagement.Application.Features.LeaveAllocation.Queries.GetLeaveAllocations;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HR.LeaveManagement.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class LeaveAllocationsController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
@@ -18,7 +20,7 @@ public class LeaveAllocationsController(IMediator mediator) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<LeaveAllocationDto>>> Get(bool isLoggedInUser = false)
     {
-        var leaveAllocations = await _mediator.Send(new GetLeaveAllocationListQuery());
+        var leaveAllocations = await _mediator.Send(new GetLeaveAllocationListQuery { IsLoggedInUser = isLoggedInUser });
         return Ok(leaveAllocations);
     }
 
@@ -32,6 +34,7 @@ public class LeaveAllocationsController(IMediator mediator) : ControllerBase
 
     // POST api/<LeaveAllocationsController>
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     [ProducesResponseType(201)]
     [ProducesResponseType(400)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -43,6 +46,7 @@ public class LeaveAllocationsController(IMediator mediator) : ControllerBase
 
     // PUT api/<LeaveAllocationsController>/5
     [HttpPut]
+    [Authorize(Roles = "Administrator")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(400)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -55,6 +59,7 @@ public class LeaveAllocationsController(IMediator mediator) : ControllerBase
 
     // DELETE api/<LeaveAllocationsController>/5
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Administrator")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]

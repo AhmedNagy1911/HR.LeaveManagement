@@ -18,15 +18,13 @@ public class LeaveRequestsController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
 
-    // GET: api/<LeaveRequestsController>
     [HttpGet]
     public async Task<ActionResult<List<LeaveRequestListDto>>> Get(bool isLoggedInUser = false)
     {
-        var leaveRequests = await _mediator.Send(new GetLeaveRequestListQuery());
+        var leaveRequests = await _mediator.Send(new GetLeaveRequestListQuery { IsLoggedInUser = isLoggedInUser });
         return Ok(leaveRequests);
     }
 
-    // GET api/<LeaveRequestsController>/5
     [HttpGet("{id}")]
     public async Task<ActionResult<LeaveRequestDetailsDto>> Get(int id)
     {
@@ -34,7 +32,6 @@ public class LeaveRequestsController(IMediator mediator) : ControllerBase
         return Ok(leaveRequest);
     }
 
-    // POST api/<LeaveRequestsController>
     [HttpPost]
     [ProducesResponseType(201)]
     [ProducesResponseType(400)]
@@ -45,7 +42,6 @@ public class LeaveRequestsController(IMediator mediator) : ControllerBase
         return CreatedAtAction(nameof(Get), new { id = response });
     }
 
-    // PUT api/<LeaveRequestsController>/5
     [HttpPut]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(400)]
@@ -57,7 +53,6 @@ public class LeaveRequestsController(IMediator mediator) : ControllerBase
         return NoContent();
     }
 
-    // PUT api/<LeaveRequestsController>/CancelRequest/
     [HttpPut]
     [Route("CancelRequest")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -70,9 +65,9 @@ public class LeaveRequestsController(IMediator mediator) : ControllerBase
         return NoContent();
     }
 
-    // PUT api/<LeaveRequestsController>/UpdateApproval/
     [HttpPut]
     [Route("UpdateApproval")]
+    [Authorize(Roles = "Administrator")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(400)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -83,7 +78,6 @@ public class LeaveRequestsController(IMediator mediator) : ControllerBase
         return NoContent();
     }
 
-    // DELETE api/<LeaveRequestsController>/5
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
