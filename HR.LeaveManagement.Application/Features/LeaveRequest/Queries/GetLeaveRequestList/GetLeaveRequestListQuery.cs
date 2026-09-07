@@ -1,9 +1,9 @@
 ﻿using MediatR;
 
-namespace HR.LeaveManagement.Application.Features.LeaveRequest.Queries.GetLeaveRequestList
+namespace HR.LeaveManagement.Application.Features.LeaveRequest.Queries.GetLeaveRequestList;
+
+public class GetLeaveRequestListQuery : IRequest<List<LeaveRequestListDto>>
 {
-    public class GetLeaveRequestListQuery : IRequest<List<LeaveRequestListDto>>
-    {
-       public bool IsLoggedInUser { get; set; }
-    }
+    public bool IsLoggedInUser { get; set; }
 }
+

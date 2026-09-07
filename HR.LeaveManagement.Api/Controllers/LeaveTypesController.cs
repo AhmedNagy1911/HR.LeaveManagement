@@ -12,12 +12,10 @@ namespace HR.LeaveManagement.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-
 public class LeaveTypesController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
 
-    // GET: api/<LeaveTypesController>
     [HttpGet]
     public async Task<List<LeaveTypeDto>> Get()
     {
@@ -25,7 +23,6 @@ public class LeaveTypesController(IMediator mediator) : ControllerBase
         return leaveTypes;
     }
 
-    // GET api/<LeaveTypesController>/5
     [HttpGet("{id}")]
     public async Task<ActionResult<LeaveTypeDetailsDto>> Get(int id)
     {
@@ -33,8 +30,8 @@ public class LeaveTypesController(IMediator mediator) : ControllerBase
         return Ok(leaveType);
     }
 
-    // POST api/<LeaveTypesController>
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     [ProducesResponseType(201)]
     [ProducesResponseType(400)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -44,8 +41,8 @@ public class LeaveTypesController(IMediator mediator) : ControllerBase
         return CreatedAtAction(nameof(Get), new { id = response });
     }
 
-    // PUT api/<LeaveTypesController>
     [HttpPut("{id}")]
+    [Authorize(Roles = "Administrator")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(400)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -56,8 +53,8 @@ public class LeaveTypesController(IMediator mediator) : ControllerBase
         return NoContent();
     }
 
-    // DELETE api/<LeaveTypesController>/5
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Administrator")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]

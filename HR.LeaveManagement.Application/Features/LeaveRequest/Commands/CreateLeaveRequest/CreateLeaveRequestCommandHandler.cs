@@ -44,7 +44,7 @@ public class CreateLeaveRequestCommandHandler(IEmailSender emailSender,
             throw new BadRequestException("Invalid Leave Request", validationResult);
         }
 
-        int daysRequested = (int)(request.EndDate - request.StartDate).TotalDays;
+        int daysRequested = (request.EndDate - request.StartDate).Days;
         if (daysRequested > allocation.NumberOfDays)
         {
             validationResult.Errors.Add(new FluentValidation.Results.ValidationFailure(
@@ -55,15 +55,16 @@ public class CreateLeaveRequestCommandHandler(IEmailSender emailSender,
         // Create leave request
         var leaveRequest = _mapper.Map<Domain.LeaveRequest>(request);
         leaveRequest.RequestingEmployeeId = employeeId;
-        leaveRequest.DateRequested = DateTime.Now;
+        leaveRequest.DateRequested = DateTime.UtcNow;
         await _leaveRequestRepository.CreateAsync(leaveRequest);
 
         // send confirmation email
         try
         {
+            var employee = await _userService.GetEmployee(employeeId);
             var email = new EmailMessage
             {
-                To = string.Empty, /* Get email from employee record */
+                To = employee.Email,
                 Body = $"Your leave request for {request.StartDate:D} to {request.EndDate:D} " +
                     $"has been submitted successfully.",
                 Subject = "Leave Request Submitted"

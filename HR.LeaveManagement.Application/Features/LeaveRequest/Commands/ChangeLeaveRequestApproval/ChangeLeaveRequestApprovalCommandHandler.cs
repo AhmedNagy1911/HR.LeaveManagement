@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HR.LeaveManagement.Application.Contracts.Email;
+using HR.LeaveManagement.Application.Contracts.Identity;
 using HR.LeaveManagement.Application.Contracts.Persistence;
 using HR.LeaveManagement.Application.Exceptions;
 using HR.LeaveManagement.Application.Models.Email;
@@ -11,6 +12,7 @@ public class ChangeLeaveRequestApprovalCommandHandler(
      ILeaveRequestRepository leaveRequestRepository,
      ILeaveTypeRepository leaveTypeRepository,
      ILeaveAllocationRepository leaveAllocationRepository,
+     IUserService userService,
      IMapper mapper,
      IEmailSender emailSender) : IRequestHandler<ChangeLeaveRequestApprovalCommand, Unit>
 {
@@ -19,6 +21,7 @@ public class ChangeLeaveRequestApprovalCommandHandler(
     private readonly ILeaveRequestRepository _leaveRequestRepository = leaveRequestRepository;
     private readonly ILeaveTypeRepository _leaveTypeRepository = leaveTypeRepository;
     private readonly ILeaveAllocationRepository _leaveAllocationRepository = leaveAllocationRepository;
+    private readonly IUserService _userService = userService;
 
     public async Task<Unit> Handle(ChangeLeaveRequestApprovalCommand request, CancellationToken cancellationToken)
     {
@@ -27,25 +30,38 @@ public class ChangeLeaveRequestApprovalCommandHandler(
         if (leaveRequest is null)
             throw new NotFoundException(nameof(LeaveRequest), request.Id);
 
+        var previousApprovalStatus = leaveRequest.Approved;
+
         leaveRequest.Approved = request.Approved;
         await _leaveRequestRepository.UpdateAsync(leaveRequest);
 
-        // if request is approved, get and update the employee's allocations
-        if (request.Approved)
-        {
-            int daysRequested = (int)(leaveRequest.EndDate - leaveRequest.StartDate).TotalDays;
-            var allocation = await _leaveAllocationRepository.GetUserAllocations(leaveRequest.RequestingEmployeeId, leaveRequest.LeaveTypeId);
-            allocation.NumberOfDays -= daysRequested;
+        var allocation = await _leaveAllocationRepository.GetUserAllocations(leaveRequest.RequestingEmployeeId, leaveRequest.LeaveTypeId);
 
+        if (allocation is null)
+            throw new NotFoundException(nameof(LeaveAllocation), leaveRequest.LeaveTypeId);
+
+        int daysRequested = (leaveRequest.EndDate - leaveRequest.StartDate).Days;
+
+        // بيتحول من غير موافَق عليه لموافَق عليه => نخصم الأيام
+        if (request.Approved && previousApprovalStatus != true)
+        {
+            allocation.NumberOfDays -= daysRequested;
+            await _leaveAllocationRepository.UpdateAsync(allocation);
+        }
+        // كان موافَق عليه وبيترفض دلوقتي => نرجّع الأيام
+        else if (!request.Approved && previousApprovalStatus == true)
+        {
+            allocation.NumberOfDays += daysRequested;
             await _leaveAllocationRepository.UpdateAsync(allocation);
         }
 
         // send confirmation email
         try
         {
+            var employee = await _userService.GetEmployee(leaveRequest.RequestingEmployeeId);
             var email = new EmailMessage
             {
-                To = string.Empty, /* Get email from employee record */
+                To = employee.Email,
                 Body = $"The approval status for your leave request for {leaveRequest.StartDate:D} to {leaveRequest.EndDate:D} has been updated.",
                 Subject = "Leave Request Approval Status Updated"
             };

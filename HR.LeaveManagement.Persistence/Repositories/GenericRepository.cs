@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HR.LeaveManagement.Persistence.Repositories;
 
-public class GenericRepository<T>(HrDatabaseContext context) 
+public class GenericRepository<T>(HrDatabaseContext context)
     : IGenericRepository<T> where T : BaseEntity
 {
     protected readonly HrDatabaseContext _context = context;
@@ -36,10 +36,19 @@ public class GenericRepository<T>(HrDatabaseContext context)
 
     public async Task UpdateAsync(T entity)
     {
-        //var originalCreatedDate = await _context.Set<T>().AsNoTracking().Where(q => q.Id == entity.Id).Select(s => s.DateCreated).SingleAsync();
-        //entity.DateCreated = originalCreatedDate;
+        var original = await _context.Set<T>()
+            .AsNoTracking()
+            .Where(q => q.Id == entity.Id)
+            .Select(s => new { s.DateCreated, s.CreatedBy })
+            .SingleOrDefaultAsync();
+
+        if (original != null)
+        {
+            entity.DateCreated = original.DateCreated;
+            entity.CreatedBy = original.CreatedBy;
+        }
+
         _context.Entry(entity).State = EntityState.Modified;
         await _context.SaveChangesAsync();
     }
-
 }

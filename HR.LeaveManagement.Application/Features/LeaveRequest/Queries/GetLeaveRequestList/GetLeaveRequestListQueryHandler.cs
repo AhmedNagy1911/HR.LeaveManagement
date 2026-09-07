@@ -14,11 +14,9 @@ public class GetLeaveRequestListQueryHandler(ILeaveRequestRepository leaveReques
 
     public async Task<List<LeaveRequestListDto>> Handle(GetLeaveRequestListQuery request, CancellationToken cancellationToken)
     {
+        List<Domain.LeaveRequest> leaveRequests;
+        List<LeaveRequestListDto> requests;
 
-        var leaveRequests = new List<Domain.LeaveRequest>();
-        var requests = new List<LeaveRequestListDto>();
-
-        // Check if it is logged in employee
         if (request.IsLoggedInUser)
         {
             var userId = _userService.UserId;
@@ -35,9 +33,22 @@ public class GetLeaveRequestListQueryHandler(ILeaveRequestRepository leaveReques
         {
             leaveRequests = await _leaveRequestRepository.GetLeaveRequestsWithDetails();
             requests = _mapper.Map<List<LeaveRequestListDto>>(leaveRequests);
+
+            // جيب كل الموظفين مرة واحدة بدل استدعاء منفصل لكل Request
+            var allEmployees = await _userService.GetEmployees();
+            var employeeLookup = allEmployees.ToDictionary(e => e.Id);
+
             foreach (var req in requests)
             {
-                req.Employee = await _userService.GetEmployee(req.RequestingEmployeeId);
+                if (employeeLookup.TryGetValue(req.RequestingEmployeeId, out var employee))
+                {
+                    req.Employee = employee;
+                }
+                else
+                {
+                    // fallback نادر لو الموظف مش موجود في نتيجة GetEmployees (مثلاً دوره اتغيّر)
+                    req.Employee = await _userService.GetEmployee(req.RequestingEmployeeId);
+                }
             }
         }
 

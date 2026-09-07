@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HR.LeaveManagement.Application.Contracts.Email;
+using HR.LeaveManagement.Application.Contracts.Identity;
 using HR.LeaveManagement.Application.Contracts.Logging;
 using HR.LeaveManagement.Application.Contracts.Persistence;
 using HR.LeaveManagement.Application.Exceptions;
@@ -8,23 +9,17 @@ using MediatR;
 
 namespace HR.LeaveManagement.Application.Features.LeaveRequest.Commands.UpdateLeaveRequest;
 
-public class UpdateLeaveRequestCommandHandler : IRequestHandler<UpdateLeaveRequestCommand, Unit>
+public class UpdateLeaveRequestCommandHandler(
+     ILeaveRequestRepository leaveRequestRepository, ILeaveTypeRepository leaveTypeRepository,
+     IUserService userService, IMapper mapper, IEmailSender emailSender,
+     IAppLogger<UpdateLeaveRequestCommandHandler> appLogger) : IRequestHandler<UpdateLeaveRequestCommand, Unit>
 {
-    private readonly IMapper _mapper;
-    private readonly IEmailSender _emailSender;
-    private readonly IAppLogger<UpdateLeaveRequestCommandHandler> _appLogger;
-    private readonly ILeaveRequestRepository _leaveRequestRepository;
-    private readonly ILeaveTypeRepository _leaveTypeRepository;
-
-    public UpdateLeaveRequestCommandHandler(
-         ILeaveRequestRepository leaveRequestRepository, ILeaveTypeRepository leaveTypeRepository, IMapper mapper, IEmailSender emailSender, IAppLogger<UpdateLeaveRequestCommandHandler> appLogger)
-    {
-        _leaveRequestRepository = leaveRequestRepository;
-        _leaveTypeRepository = leaveTypeRepository;
-        _mapper = mapper;
-        this._emailSender = emailSender;
-        this._appLogger = appLogger;
-    }
+    private readonly IMapper _mapper = mapper;
+    private readonly IEmailSender _emailSender = emailSender;
+    private readonly IUserService _userService = userService;
+    private readonly IAppLogger<UpdateLeaveRequestCommandHandler> _appLogger = appLogger;
+    private readonly ILeaveRequestRepository _leaveRequestRepository = leaveRequestRepository;
+    private readonly ILeaveTypeRepository _leaveTypeRepository = leaveTypeRepository;
 
     public async Task<Unit> Handle(UpdateLeaveRequestCommand request, CancellationToken cancellationToken)
     {
@@ -47,9 +42,10 @@ public class UpdateLeaveRequestCommandHandler : IRequestHandler<UpdateLeaveReque
         try
         {
             // send confirmation email
+            var employee = await _userService.GetEmployee(leaveRequest.RequestingEmployeeId);
             var email = new EmailMessage
             {
-                To = string.Empty, /* Get email from employee record */
+                To = employee.Email,
                 Body = $"Your leave request for {request.StartDate:D} to {request.EndDate:D} " +
                         $"has been updated successfully.",
                 Subject = "Leave Request Updated"
