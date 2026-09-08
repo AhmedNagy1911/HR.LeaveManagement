@@ -6,13 +6,10 @@ using System.Net.Mail;
 
 namespace HR.LeaveManagement.Infrastructure.EmailService;
 
-public class EmailSender : IEmailSender
+public class EmailSender(IOptions<EmailSettings> emailSettings) : IEmailSender
 {
-    public EmailSettings _emailSettings { get; }
-    public EmailSender(IOptions<EmailSettings> emailSettings)
-    {
-        _emailSettings = emailSettings.Value;
-    }
+    private readonly EmailSettings _emailSettings = emailSettings.Value;
+
     public async Task<bool> SendEmail(EmailMessage email)
     {
         var message = new MailMessage
