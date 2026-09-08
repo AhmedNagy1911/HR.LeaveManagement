@@ -3,13 +3,9 @@ using Microsoft.Extensions.Logging;
 
 namespace HR.LeaveManagement.Infrastructure.Logging;
 
-public class LoggerAdapter<T> : IAppLogger<T>
+public class LoggerAdapter<T>(ILoggerFactory loggerFactory) : IAppLogger<T>
 {
-    private readonly ILogger<T> _logger;
-    public LoggerAdapter(ILoggerFactory loggerFactory)
-    {
-        _logger = loggerFactory.CreateLogger<T>();
-    }
+    private readonly ILogger<T> _logger = loggerFactory.CreateLogger<T>();
 
     public void LogInformation(string message, params object[] args)
     {

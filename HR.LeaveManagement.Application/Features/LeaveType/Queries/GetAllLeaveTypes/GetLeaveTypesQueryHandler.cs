@@ -5,7 +5,9 @@ using MediatR;
 
 namespace HR.LeaveManagement.Application.Features.LeaveType.Queries.GetAllLeaveTypes;
 
-public class GetLeaveTypesQueryHandler(ILeaveTypeRepository leaveTypeRepository, IMapper mapper, IAppLogger<GetLeaveTypesQueryHandler> logger)
+public class GetLeaveTypesQueryHandler(ILeaveTypeRepository leaveTypeRepository,
+    IMapper mapper,
+    IAppLogger<GetLeaveTypesQueryHandler> logger)
     : IRequestHandler<GetLeaveTypesQuery, List<LeaveTypeDto>>
 {
     private readonly ILeaveTypeRepository _leaveTypeRepository = leaveTypeRepository;
